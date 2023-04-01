@@ -1,11 +1,37 @@
 <script>
 import Nav from "../components/nav.vue";
 import Jumbotron from "../components/jumbotron.vue";
+import Modal from "../components/modal.vue";
 export default{
     components: {
 		Nav,
-        Jumbotron
+        Jumbotron,
+        Modal
 	},
+    data() {
+        return {
+           x:10,
+           modal:false
+        }
+    },
+    methods: {
+        scroll(e) {
+            if (e.deltaY > 0) this.$refs.container.scrollLeft += 80;
+            else this.$refs.container.scrollLeft -= 80;
+        },
+        scrollLeft() {
+            this.$refs.container.scrollLeft -= 100;
+        },
+        scrollRight() {
+            this.$refs.container.scrollLeft += 100;
+        },
+        openModal(){
+            this.modal=true;
+        },
+        closeModal(){
+            this.modal=false;
+        }
+    }
 
 }
 
@@ -20,86 +46,111 @@ export default{
         </div>
         <div>
             <!-- component -->
+            <section class="antialiased bg-gray-100 text-gray-600  px-4 py-4 font-mono h-screen" x-data="app">
 
+                <!-- Revisited List -->
+                <div>
+                    <p class="text-left text-lg text-gray-800 py-2 px-2">Take a glance of the <span class="font-semibold text-brownish-red">restaurants already visited</span> by you !!!</p>
+                    <div class="flex border border-brownish-red-light border-opacity-40  bg-brownish-light bg-opacity-20 shadow-md ">
+                        <div  class="h-full w-1/12 flex justify-center items-center py-14">
+                            <button v-show="x>=4" class="cursor-pointer" @click="scrollLeft($event)">
+                                <img class="h-8 w-8 fill-current bg-brownish-red-light rounded-full" src="https://img.icons8.com/external-inkubators-detailed-outline-inkubators/50/000000/external-left-chevron-arrows-inkubators-detailed-outline-inkubators.png"/>            
+                            </button>
+                        </div>
 
-<section class="antialiased bg-gray-100 text-gray-600  px-4 py-4 font-mono" x-data="app">
-    <div class="flex flex-col lg:w-1/2">
-        <!-- Table -->
-        <div class="w-full max-w-2xl mx-auto bg-white shadow-lg rounded-sm border border-gray-200">
-            <header class="px-5 py-4 border-b border-gray-100">
-                <div class="font-semibold text-gray-700"> Revisited restaurant history: </div>
-            </header>
-
-            <div class="overflow-x-auto p-3">
-                <table class="table-auto w-full">
-                    <thead class="text-xs font-semibold uppercase text-gray-700 bg-brownish-red-light bg-opacity-30">
-                        <tr>
-                            <th></th>
-                            <th class="p-2">
-                                <div class="font-semibold text-left">Cuisine Name</div>
-                            </th>
-                            <th class="p-2">
-                                <div class="font-semibold text-left">Place ID</div>
-                            </th>
-                            <th class="p-2">
-                                <div class="font-semibold text-left">Overall Rating</div>
-                            </th>
-                            <th class="p-2">
-                                <div class="font-semibold text-center"></div>
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="text-sm divide-y divide-gray-100">
-                        <!-- record 1 -->
-                        <tr v-for="x in 5" :key="x">
-                            <td class="p-2">
-                                <!-- <input type="checkbox" class="w-5 h-5" value="id-1"
-                                    @click="toggleCheckbox($el, 2890.66)" /> -->
-                            </td>
-                            <td class="p-2">
-                                <div class="font-medium text-gray-800">
-                                    Spanish
+                        <div class="py-3 font-mono flex w-10/12 overflow-x-scroll no-scrollbar hide-scroll-bar scroll-smooth" ref="container">
+                            <div v-for ="i in x" :key="i" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-60 shrink-0" @wheel="scroll($event)">
+                                <div class="flex justify-center md:justify-start -mt-7">
+                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{i }}</span></div>
                                 </div>
-                            </td>
-                            <td class="p-2">
-                                <div class="text-left">P10001</div>
-                            </td>
-                            <td class="p-2">
-                                <div class="text-left font-medium text-base text-green-500">
-                                    02
+                                <div class="py-2 flex justify-between">
+                                    <h2 class="text-gray-800 text-base font-semibold">Spanish</h2>
+                                    <p class="text-gray-600 text-xs py-0.5">Overall Rating</p>
                                 </div>
-                            </td>
-                            <td class="p-2">
-                                <div class="flex justify-center">
-                                    <button>
-                                        <svg class="w-8 h-8 hover:text-red-600 rounded-full hover:bg-gray-100 p-1"
-                                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
-                                        </svg>
-                                    </button>
+                                <div class="flex justify-between">
+                                    <p class="text-sm font-semibold text-brownish-red-darker mt-1">Pl00001</p>
+                                    <div class="flex mt-1">
+                                        <div class="py-0.5">
+                                            <img class="h-4 w-4 " src="https://img.icons8.com/color/48/null/filled-star--v1.png"/>
+                                        </div>
+                                    
+                                        <p class="text-sm font-bold text-green-400 px-0.5 font ">3.4</p>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                            </div>
+                        </div>
+                        <div  class="h-full w-1/12 flex justify-center items-center py-14">
+                            <button v-show="x>=4" class="cursor-pointer"  @click="scrollRight($event)">
+                                <img class="h-8 w-8 fill-current bg-brownish-red-light rounded-full" src="https://img.icons8.com/ios/50/null/circled-chevron-right--v1.png"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recommendation List -->
+                <div class="py-10">
+                    <article class="mb-4">
+
+                        <p class="text-left text-lg text-brownish-red font-semibold py-2 px-2">Are you craving an unforgettable dining experience?</p>
+                        <div class="flex justify-between">
+                            <div>
+                                <p class="text-base text-gray-500 px-2 font-normal pb-3">These options are definitely worth a try!</p>
+                            </div>
+                            <!-- <div class="px-2"> -->
+                                <button class=" border-2 rounded px-2 py-1 border-brownish-red-dark  bg-white">
+                                    <span class="text-sm font-semibold text-gray-600 hover:text-brownish-red-dark">Load More</span> 
+                                </button>
+                            <!-- </div> -->
+                        </div>
+                    </article>
+
+                    <div class="flex border border-brownish-red-light border-opacity-40 bg-brownish-light bg-opacity-20 shadow-md ">
+                        <div  class="h-full w-1/12 flex justify-center items-center py-14">   
+                        </div>
+
+                        <div class="py-3 font-mono flex w-10/12">
+                            <div v-for ="i in 5" :key="i" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-60 shrink-0">
+                                <div class="flex justify-center md:justify-start -mt-7">
+                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{i}}</span></div>
+                                </div>
+                                <div class="py-2 flex justify-between">
+                                    <h2 class="text-gray-800 text-base font-semibold pr-8">Spanish</h2>
+                                    <p class="text-sm font-semibold text-brownish-red-darker mt-1 ">Pl00001</p>
+                                </div>
+                                <div class="flex justify-end py-2">
+                                    <button class="border hover:shadow-sm hover:border-2 shadow border-green-400 px-3 py-0.5 rounded-full text-xs font-semibold text-green-400 "  @click="openModal">Rate Restaurant</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div  class="h-full w-1/6 flex justify-center items-center py-14">
+                        </div>
+                    </div>
+                </div>
+                <!-- Modal -->
+                <Modal v-if="this.modal" @close="closeModal">
+                    <template v-slot:body>
+                        <div>
+                            <p>Review Restaurant</p>
+                        </div>
+                        
+                    </template>
+                </Modal>
+            </section>
         </div>
     </div>
-    <div class="lg:w-1/2 flex flex-col">
-
-    </div>
-</section>
-
-        </div>
-       
-    </div>
-  
 </template>
 
 <style scoped>
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}
 
 </style>

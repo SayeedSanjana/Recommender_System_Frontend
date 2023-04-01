@@ -11,7 +11,7 @@ export default{
     <nav class="flex bg-red-50 bg-opacity-40 items-center relative justify-between  px-4 py-2 w-full border-b-4 border-opacity-30 shadow-sm border-brownish-light">
   <div class="flex">
     <img src="https://img.icons8.com/glyph-neue/64/000000/restaurant-building.png"/>
-    <p class="font-mono px-2 font-semibold text-gray-600 py-6">Restaurant Recommender Website</p>
+    <p class="font-mono px-2 font-semibold text-gray-600 py-6 text-lg">Feast-Hub</p>
  </div>
 
   <div class="flex font-mono">

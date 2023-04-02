@@ -4,6 +4,7 @@ import router from './router'
 
 //import './assets/main.css'
 import './index.css'
+import './axios'
 
 const app = createApp(App)
 

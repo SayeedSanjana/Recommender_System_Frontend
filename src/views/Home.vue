@@ -10,14 +10,30 @@ export default{
         Modal,
         StarRating
 	},
+    created() {
+        this.parseJwt(this.token)
+    },
+
     data() {
         return {
+           token: localStorage.getItem('token'),
            x:10,
            modal:false,
-           rating:0
+           rating:0,
+           userID:''
         }
     },
     methods: {
+        parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            console.log(JSON.parse(jsonPayload));
+            this.userID=JSON.parse(jsonPayload).userID;
+            console.log(this.userID);
+        },
         scroll(e) {
             if (e.deltaY > 0) this.$refs.container.scrollLeft += 80;
             else this.$refs.container.scrollLeft -= 80;
@@ -42,7 +58,7 @@ export default{
 <template>
     <div class="bg-rose-50">
         <div class="py-3">
-            <Nav />
+            <Nav :userID="userID"/>
         </div>
         <div class="hidden lg:block lg:px-8 lg:py-8 ">
             <Jumbotron/>

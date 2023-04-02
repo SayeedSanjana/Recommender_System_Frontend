@@ -69,7 +69,7 @@ export default{
 								<p class="inline-block text-sm  align-baseline ">
 									<span class="cursor-none text-gray-600">Already have an account?</span>
                    <a class="cursor-pointer p-1  font-semibold text-brownish-red-dark hover:text-brownish-red" href="#">
-                    <router-link to="/sign-up">Login</router-link>
+                    <router-link to="/">Login</router-link>
                   </a>
                 </p>
 							</div>

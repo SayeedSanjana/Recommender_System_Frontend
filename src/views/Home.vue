@@ -1,4 +1,6 @@
 <script>
+import axios from 'axios';
+import swal from 'sweetalert';
 import Nav from "../components/nav.vue";
 import Jumbotron from "../components/jumbotron.vue";
 import Modal from "../components/modal.vue";
@@ -10,17 +12,37 @@ export default{
         Modal,
         StarRating
 	},
-    created() {
-        this.parseJwt(this.token)
+    computed: {
+        displayedValues() {
+            return this.recommendedRestaurants.slice(0, this.displayedCount);
+        },
+  },
+    mounted() {
+        this.parseJwt(this.token);
+        this.getRevisitedRestaurant(this.userID);
+        this.getRecommendedRestaurant(this.userID);
+    },
+    updated(){
+       // this.getRevisitedRestaurant(this.userID);
     },
 
     data() {
         return {
            token: localStorage.getItem('token'),
-           x:10,
            modal:false,
            rating:0,
-           userID:''
+           userID:'',
+           revisitedRestaurants:[],
+           recommendedRestaurants:[],
+           recomRes:[],
+           errorMsg:'',
+           displayedCount: 5,
+           formData:{
+                userID:'',
+                placeID:'',
+                food_rating:0,
+                service_rating:0
+           }
         }
     },
     methods: {
@@ -30,9 +52,7 @@ export default{
             var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
                 return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
             }).join(''));
-            console.log(JSON.parse(jsonPayload));
             this.userID=JSON.parse(jsonPayload).userID;
-            console.log(this.userID);
         },
         scroll(e) {
             if (e.deltaY > 0) this.$refs.container.scrollLeft += 80;
@@ -44,14 +64,76 @@ export default{
         scrollRight() {
             this.$refs.container.scrollLeft += 100;
         },
-        openModal(){
+        openModal(id){
+            this.formData.placeID=id;
             this.modal=true;
+           
         },
         closeModal(){
             this.modal=false;
-        }
+        },
+        async getRevisitedRestaurant(id) {
+            await axios.get('http://localhost:8000/api/dinein/most-visited/' + id, {
+                headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token') }`
+                }
+            })
+            .then((response) => {
+                this.revisitedRestaurants = response.data['data'];
+            })
+            .catch((error) => {
+                console.log(error)
+                this.errorMsg = 'Error retrieving data'
+            })
+      },
+      async getRecommendedRestaurant(id) {
+            await axios.get('http://localhost:8000/api/dinein/recommend/' + id, {
+                headers: {
+                "Authorization": `Bearer ${localStorage.getItem('token') }`
+                }
+            })
+            .then((response) => {
+                this.recommendedRestaurants = response.data['data'];
+            })
+            .catch((error) => {
+                console.log(error)
+                this.errorMsg = 'Error retrieving data'
+            })
+      },
+      async submitReview() {
+			if (this.formData.food_rating>=1 && this.formData.service_rating>=1) {
+                this.formData.userID=this.userID;
+				await axios.post(
+					'http://localhost:8000/api/dinein/rating/add', this.formData, {
+                    headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('token') }`
+                    }
+                    })
+                    .then(() => {
+                        swal({
+                            title: "Success",
+                            text: "Review given successfully!",
+                            icon: "success",
+                            timer: 1000,
+                            buttons: false
+                        });
+                        this.closeModal();
+                        this.getRevisitedRestaurant();
+                    })
+					.catch((error) => {
+						swal({
+							title: "Invalid Information",
+							text: "Invalid Rating and Information",
+							icon: "error",
+							buttons: true,
+						})
+					})
+			}
+		},
+      loadMore() {
+        this.displayedCount += 5;
+    },
     }
-
 }
 
 </script>
@@ -71,42 +153,44 @@ export default{
                 <div>
                     <div class="flex justify-between">
                         <p class="text-left text-xl text-gray-800 py-2 px-2">Take a glance of the <span class="font-semibold text-brownish-red">restaurants already visited</span> by you !!!</p>
-                        <p class="text-left text-sm text-gray-800 py-2 px-2 flex justify-end">Total results showing - <span class="font-semibold text-brownish-red ml-0.5"> 10</span></p>
+                        <p class="text-left text-sm text-gray-800 py-2 px-2 flex justify-end">Total results showing - <span class="font-semibold text-brownish-red ml-0.5">{{ this.revisitedRestaurants.length}}</span></p>
                     </div>
-                    <div class="flex border border-brownish-red-light border-opacity-40  bg-brownish-light bg-opacity-20 shadow-md ">
+                    <div v-if="this.revisitedRestaurants.length>=1" class="flex border border-brownish-red-light border-opacity-40  bg-brownish-light bg-opacity-20 shadow-md ">
                         <div  class="h-full w-1/12 flex justify-center items-center py-14">
-                            <button v-show="x>=4" class="cursor-pointer" @click="scrollLeft($event)">
+                            <button v-show="this.revisitedRestaurants.length>=4" class="cursor-pointer" @click="scrollLeft($event)">
                                 <img class="h-8 w-8 fill-current bg-brownish-red-light rounded-full" src="https://img.icons8.com/external-inkubators-detailed-outline-inkubators/50/000000/external-left-chevron-arrows-inkubators-detailed-outline-inkubators.png"/>            
                             </button>
                         </div>
 
                         <div class="py-3 font-mono flex w-10/12 overflow-x-scroll no-scrollbar hide-scroll-bar scroll-smooth" ref="container">
-                            <div v-for ="i in x" :key="i" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-60 shrink-0" @wheel="scroll($event)">
+                            <div v-for ="(item,index) in this.revisitedRestaurants" :key="index" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-60 shrink-0" @wheel="scroll($event)">
                                 <div class="flex justify-center md:justify-start -mt-7">
-                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{i }}</span></div>
+                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{index+1}}</span></div>
                                 </div>
                                 <div class="py-2 flex justify-between">
-                                    <h2 class="text-gray-800 text-base font-semibold">Spanish</h2>
+                                    <div v-if="item.cusine" class="text-gray-800 text-base font-semibold">{{ item.cusine.rcuisine}}</div>
+                                    <div v-else class="text-gray-800 text-base font-semibold">-</div>
                                     <p class="text-gray-600 text-xs py-0.5">Overall Rating</p>
                                 </div>
                                 <div class="flex justify-between">
-                                    <p class="text-sm font-semibold text-brownish-red-darker mt-1">Pl00001</p>
-                                    <div class="flex mt-1">
+                                    <p class="text-sm text-gray-500">PlaceID- <span class="text-sm font-semibold text-brownish-red-darker mt-1">{{ item.placeID }}</span></p>
+                                    <div class="flex">
                                         <div class="py-0.5">
                                             <img class="h-4 w-4 " src="https://img.icons8.com/color/48/null/filled-star--v1.png"/>
                                         </div>
                                     
-                                        <p class="text-sm font-bold text-green-400 px-0.5 font ">3.4</p>
+                                        <p class="text-sm font-bold text-green-400 px-0.5 font ">{{item.overall_rating }}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div  class="h-full w-1/12 flex justify-center items-center py-14">
-                            <button v-show="x>=4" class="cursor-pointer"  @click="scrollRight($event)">
+                            <button v-show="this.revisitedRestaurants.length>=4" class="cursor-pointer"  @click="scrollRight($event)">
                                 <img class="h-8 w-8 fill-current bg-brownish-red-light rounded-full" src="https://img.icons8.com/ios/50/null/circled-chevron-right--v1.png"/>
                             </button>
                         </div>
                     </div>
+                    <div v-else class="text-gray-600 text-lg px-2">No results to be shown...</div>
                 </div>
 
                 <!-- Recommendation List -->
@@ -119,37 +203,37 @@ export default{
                                 <p class="text-base text-gray-500 px-2 font-normal pb-3">These options are definitely worth a try!</p>
                             </div>
                             <!-- <div class="px-2"> -->
-                                <button class=" border-2 rounded px-2 py-1 border-brownish-red-dark  bg-white">
+                                <button class=" border-2 rounded px-2 py-1 border-brownish-red-dark  bg-white" @click="loadMore">
                                     <span class="text-sm font-semibold text-gray-600 hover:text-brownish-red-dark">Load More</span> 
                                 </button>
                             <!-- </div> -->
                         </div>
                     </article>
 
-                    <div class="flex border border-brownish-red-light border-opacity-40 bg-brownish-light bg-opacity-20 shadow-md ">
+                    <div v-if="this.recommendedRestaurants.length>=1" class="flex border border-brownish-red-light border-opacity-40 bg-brownish-light bg-opacity-20 shadow-md ">
                         <div  class="h-full w-1/12 flex justify-center items-center py-14">   
                         </div>
-
-                        <div class="py-3 font-mono flex w-10/12">
-                            <div v-for ="i in 5" :key="i" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-60 shrink-0">
+                        <div class="py-3 font-mono grid grid-cols-5  w-10/12">
+                            <div v-for ="(item,index) in this.displayedValues" :key="index" class="max-w-md py-3 px-4 mx-2 bg-white shadow-lg rounded-lg my-5 w-56 shrink-0">
                                 <div class="flex justify-center md:justify-start -mt-7">
-                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{i}}</span></div>
+                                    <div class="w-10 h-10 object-cover rounded-full border-2 border-brownish-red-dark bg-brownish-red text-white text-center"><span class="">{{index+1}}</span></div>
                                 </div>
                                 <div class="py-2 flex justify-between">
-                                    <h2 class="text-gray-800 text-base font-semibold pr-8">Spanish</h2>
-                                    <p class="text-sm font-semibold text-brownish-red-darker mt-1 ">Pl00001</p>
+                                    <h2 class="text-gray-800 text-sm font-semibold pr-8">{{item.Rcuisine}}</h2>
+                                    <span class="text-sm font-semibold text-brownish-red-darker mt-1">{{ item.placeID }}</span>
                                 </div>
                                 <div class="flex justify-end py-2">
-                                    <button class="border hover:shadow-sm hover:border-2 shadow border-green-400 px-3 py-0.5 rounded-full text-xs font-semibold text-green-400 "  @click="openModal">Rate</button>
+                                    <button class="border hover:shadow-sm hover:border-2 shadow border-green-400 px-3 py-0.5 rounded-full text-xs font-semibold text-green-400 "  @click="openModal(item.placeID)">Rate</button>
                                 </div>
                             </div>
                         </div>
-                        <div  class="h-full w-1/6 flex justify-center items-center py-14">
+                        <div  class="h-full w-1/12 flex justify-center items-center py-14">
                         </div>
                     </div>
+                    <div v-else class="text-gray-600 text-lg px-2 ">No results to be shown...</div>
                 </div>
                 <!-- Modal -->
-                <Modal :width="'w-1/3'" v-if="this.modal" @close="closeModal">
+                <Modal :width="'w-1/3'" v-show="this.modal" @close="closeModal">
                     <template v-slot:header>
                         <h3 class="">Review Restaurant</h3>
                     </template>
@@ -160,7 +244,7 @@ export default{
                             <tr class="flex items-center justify-center">
                                 <td class="text-xl font-mono px-2 mt-1 text-left">Food Rating - </td>
                                 <td>
-                                    <star-rating v-model:rating="this.rating" v-bind:increment="1"
+                                    <star-rating v-model:rating="this.formData.food_rating" v-bind:increment="1"
                                         v-bind:max-rating="5"
                                         inactive-color="#A9A9A9"
                                         active-color="#f9ac1b"
@@ -173,7 +257,7 @@ export default{
                             <tr class="flex items-center justify-center">
                                 <td class="text-xl font-mono text-left px-2 mt-1"> Service Rating - </td>
                                 <td>
-                                    <star-rating  v-bind:increment="1"
+                                    <star-rating  v-model:rating="this.formData.service_rating" v-bind:increment="1"
                                         v-bind:max-rating="5"
                                         inactive-color="#A9A9A9"
                                         active-color="#f9ac1b"
@@ -189,7 +273,7 @@ export default{
                     </template>
                     <template  v-slot:footer>
                         <div class="flex justify-center py-6">
-                            <button class=" border-2 rounded px-2 py-1 border-brownish-red-dark bg-white">
+                            <button @click="submitReview()" class=" border-2 rounded px-2 py-1 border-brownish-red-dark bg-white">
                                 <span class="text-base font-semibold text-gray-600 hover:text-brownish-red-dark">Submit</span> 
                             </button>
                         </div>

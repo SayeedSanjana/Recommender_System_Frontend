@@ -22,11 +22,10 @@ export default{
 			formData: {
 				idenfitier: {
 					required,
-					email
 				},
 				password: {
 					required,
-					minLength: minLength(8)
+					minLength: minLength(5)
 				},
 			}
 		}
@@ -38,7 +37,6 @@ export default{
 				await axios.post(
 					'http://localhost:8000/api/users/login', this.formData, )
 					.then((response) => {
-						console.log(response)
 						if (response.data.data !== null) {
 							localStorage.setItem("token", response.data.data)
 						}
@@ -78,14 +76,14 @@ export default{
 						<form class="px-8 pt-6 pb-8 mb-4 bg-white rounded"  @submit.prevent="loginUser">
 							<div class="mb-4">
 								<label class="block mb-2 text-sm font-bold text-gray-700" for="username">
-									Email
+									Username
 								</label>
 								<input
 								    v-model.trim="formData.idenfitier"  @blur="v$.formData.idenfitier.$touch()" 
 									class="w-full px-3 py-2 text-sm leading-tight text-gray-700 border rounded shadow appearance-none focus:outline-none focus:shadow-outline"
-									id="email"
-									type="email"
-									placeholder="Email "
+									id="username"
+									type="text"
+									placeholder="Username"
 								/>
 								<small class="text-red-500 flex justify-start text-xs" v-if="v$.formData.idenfitier.$error">{{v$.formData.idenfitier.$errors[0].$message}}</small>
 							</div>

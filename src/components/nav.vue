@@ -53,7 +53,7 @@ export default{
 
                         </svg>
                 </span>
-                <span @click="logout" class="text-brownish-red-dark hover:text-brownish-red hover:underline text-sm cursor-pointer font-semibold ml-0.5"> Test Case </span>
+                <router-link to="/test-case" class="text-brownish-red-dark hover:text-brownish-red hover:underline text-sm cursor-pointer font-semibold ml-0.5"> Test Case </router-link>
             </div>
         </div>
     </div>

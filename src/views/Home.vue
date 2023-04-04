@@ -117,8 +117,11 @@ export default{
                             timer: 1000,
                             buttons: false
                         });
+                        this.getRevisitedRestaurant(this.userID);
+                        this.getRecommendedRestaurant(this.userID);
+                        this.formData.food_rating=0;
+                        this.formData.service_rating=0;
                         this.closeModal();
-                        this.getRevisitedRestaurant();
                     })
 					.catch((error) => {
 						swal({
@@ -220,7 +223,16 @@ export default{
                                 </div>
                                 <div class="py-2 flex justify-between">
                                     <h2 class="text-gray-800 text-sm font-semibold pr-8">{{item.Rcuisine}}</h2>
-                                    <span class="text-sm font-semibold text-brownish-red-darker mt-1">{{ item.placeID }}</span>
+                                    <span class="text-sm font-semibold text-brownish-red-darker mt-1">{{ item.placeID}}</span>
+                                </div>
+                                <div class="py-2">
+                                    <h2 class="text-gray-600 text-xs font-semibold pr-8"><span class="text-gray-500 font-medium"> Place score -  </span>{{item.place_score.toFixed(3)}}</h2>
+                                    <div class="text-gray-600 text-xs font-semibold pr-8 flex">
+                                        <div class="text-gray-500 font-medium"> Predicted score -</div>
+                                        <img class="h-4 w-4 " src="https://img.icons8.com/color/48/null/filled-star--v1.png"/>
+                                        <div class="text-red-500">{{item.predicted_rating.toFixed(3)}}</div>
+                                    </div>
+                                    
                                 </div>
                                 <div class="flex justify-end py-2">
                                     <button class="border hover:shadow-sm hover:border-2 shadow border-green-400 px-3 py-0.5 rounded-full text-xs font-semibold text-green-400 "  @click="openModal(item.placeID)">Rate</button>

@@ -23,7 +23,7 @@ export default{
     <div class="flex">
         <img src="https://img.icons8.com/glyph-neue/64/000000/restaurant-building.png"/>
         <div class="flex">
-            <p class="font-mono px-2 font-semibold text-gray-600 py-6 text-lg">Feast-Hub</p>
+            <router-link to="/home" class="font-mono px-2 font-semibold text-gray-600 py-6 text-lg cursor-pointer">Feast-Hub</router-link>
             
         </div>
     </div>
